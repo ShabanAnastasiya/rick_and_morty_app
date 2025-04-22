@@ -1,6 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../core.dart';
 
 class SettingsCubit extends Cubit<material.ThemeMode> {
   SettingsCubit() : super(material.ThemeMode.light) {

@@ -1,11 +1,12 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:character_details/detail_navigation.gm.dart';
 import 'package:core/core.dart';
-import 'package:core/src/bloc/character_list/character_list_bloc.dart';
 import 'package:core_ui/src/widgets/color_circle_row.dart';
+import 'package:core_ui/src/widgets/text_pair.dart';
 import 'package:data/src/entities/character.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:navigation/navigation.dart';
-
+import 'bloc/character_list_bloc.dart';
 import 'custom_dropdown_button.dart';
 
 @RoutePage()
@@ -22,17 +23,20 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
   @override
   void initState() {
     super.initState();
+    //todo
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         final CharacterListState state =
             context.read<CharacterListBloc>().state;
+
         if (state is CharacterLoaded && !state.hasReachedMax) {
+          final bloc = context.read<CharacterListBloc>();
           context.read<CharacterListBloc>().add(
                 LoadCharactersWithFilter(
-                  status: state.selectedStatus,
-                  species: state.selectedSpecies,
-                ),
+                    page: bloc.currentPage,
+                    status: bloc.selectedStatus,
+                    species: bloc.selectedSpecies),
               );
         }
       }
@@ -44,32 +48,28 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
     return Scaffold(
       appBar: AppBar(),
       body: Column(
-        children: [
+        children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               BlocBuilder<CharacterListBloc, CharacterListState>(
                 builder: (BuildContext context, CharacterListState state) {
-                  final selectedStatus = (state is CharacterLoaded)
-                      ? state.selectedStatus
-                      : AppConstants.DEFAULT_CHARACTER_STATUS;
+                  final bloc = context.read<CharacterListBloc>();
+
                   return CustomDropdownButton(
-                    value: selectedStatus,
+                    value: bloc.selectedStatus,
                     items: const <String>[
                       AppConstants.DEFAULT_CHARACTER_STATUS,
                       AppConstants.CHARACTER_STATUS_DEAD,
                       AppConstants.CHARACTER_STATUS_UNKNOWN,
                     ],
-                    selectedValue:
-                        state is CharacterLoaded ? state.selectedStatus : null,
+                    selectedValue: bloc.selectedStatus,
                     onChanged: (String? value) {
                       context.read<CharacterListBloc>().add(
                             LoadCharactersWithFilter(
                               page: 1,
                               status: value,
-                              species: state is CharacterLoaded
-                                  ? state.selectedSpecies
-                                  : AppConstants.DEFAULT_CHARACTER_SPECIES,
+                              species: bloc.selectedSpecies,
                             ),
                           );
                     },
@@ -79,24 +79,20 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
               ),
               BlocBuilder<CharacterListBloc, CharacterListState>(
                 builder: (BuildContext context, CharacterListState state) {
-                  final selectedSpecies = (state is CharacterLoaded)
-                      ? state.selectedSpecies
-                      : AppConstants.DEFAULT_CHARACTER_SPECIES;
+                  final bloc = context.read<CharacterListBloc>();
+
                   return CustomDropdownButton(
-                    value: selectedSpecies,
+                    value: bloc.selectedSpecies,
                     items: const <String>[
                       AppConstants.DEFAULT_CHARACTER_SPECIES,
                       AppConstants.CHARACTER_SPECIES_ALIEN,
                     ],
-                    selectedValue:
-                        state is CharacterLoaded ? state.selectedSpecies : null,
+                    selectedValue: bloc.selectedSpecies,
                     onChanged: (String? value) {
                       context.read<CharacterListBloc>().add(
                             LoadCharactersWithFilter(
                               page: 1,
-                              status: state is CharacterLoaded
-                                  ? state.selectedStatus
-                                  : AppConstants.DEFAULT_CHARACTER_STATUS,
+                              status: bloc.selectedStatus,
                               species: value,
                             ),
                           );
@@ -125,7 +121,8 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
                       final Result character = state.characters[index];
                       return GestureDetector(
                         onTap: () {
-                          //=context.router.push(CharacterDetailRoute(character: character));
+                          context.router
+                              .push(CharacterDetailRoute(character: character));
                         },
                         child: Card(
                           margin: const EdgeInsets.all(12),
@@ -168,12 +165,12 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
                                         ],
                                       ),
                                       const SizedBox(height: 12),
-                                      _TextPair(
+                                      TextPair(
                                         AppConstants.LAST_KNOWN_LOCATION,
                                         character.location.name,
                                       ),
                                       const SizedBox(height: 12),
-                                      _TextPair(
+                                      TextPair(
                                         AppConstants.FIRST_SEEN_IN,
                                         character.origin.name,
                                       ),
@@ -207,29 +204,5 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-}
-
-class _TextPair extends StatelessWidget {
-  final String topText;
-  final String bottomText;
-
-  const _TextPair(this.topText, this.bottomText);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          topText,
-          style: TextStyle(
-            height: 1.5,
-            color: Colors.grey.withOpacity(0.8),
-          ),
-        ),
-        Text(bottomText),
-      ],
-    );
   }
 }

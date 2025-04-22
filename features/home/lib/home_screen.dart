@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:character_list/list_navigation.gm.dart';
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:settings/settings_navigation.gm.dart';
 
@@ -15,7 +16,7 @@ class HomeScreen extends StatelessWidget {
         SettingsRoute(),
       ],
       builder: (BuildContext context, Widget child) {
-        final tabsRouter = AutoTabsRouter.of(context);
+        final TabsRouter tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
           body: child,
           bottomNavigationBar: BottomNavigationBar(
@@ -24,11 +25,11 @@ class HomeScreen extends StatelessWidget {
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.list),
-                label: 'Home',
+                label: AppConstants.HOME_LABEL,
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings),
-                label: 'Settings',
+                label: AppConstants.SETTINGS_LABEL,
               ),
             ],
           ),

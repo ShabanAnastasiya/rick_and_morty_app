@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:core_ui/src/widgets/detail_field.dart';
 import 'package:data/src/entities/character.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class CharacterDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Name: ${character.name}',
+                '${AppConstants.NAME_LABEL}: ${character.name}',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -38,27 +39,27 @@ class CharacterDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               DetailField(
-                label: 'Status',
+                label: AppConstants.STATUS_LABEL,
                 value: character.status,
               ),
               DetailField(
-                label: 'Species',
+                label: AppConstants.SPECIES_LABEL,
                 value: character.species,
               ),
               DetailField(
-                label: 'Created',
+                label: AppConstants.CREATED_LABEL,
                 value: character.created.toString(),
               ),
               DetailField(
-                label: 'Gender',
+                label: AppConstants.GENDER_LABEL,
                 value: character.gender,
               ),
               DetailField(
-                label: 'Location',
+                label: AppConstants.LOCATION_LABEL,
                 value: character.location.name,
               ),
               DetailField(
-                label: 'Origin',
+                label: AppConstants.ORIGIN_LABEL,
                 value: character.origin.name,
               ),
             ],

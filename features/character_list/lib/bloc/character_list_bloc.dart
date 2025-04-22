@@ -1,21 +1,28 @@
-import 'package:bloc/bloc.dart';
+import 'package:core/core.dart';
 import 'package:data/src/entities/character.dart';
-import 'package:data/src/repositories/character_repository.dart';
-import '../../../core.dart';
+import 'package:domain/src/use_cases/character_list_use_case.dart';
 
 part 'character_list_event.dart';
 
 part 'character_list_state.dart';
 
 class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
-  final CharacterRepository repository;
-  int _currentPage = 1;
+  final GetCharacterUseCase getCharacterUseCase;
+
+  int currentPage = 1;
   int _totalPages = 1;
   bool _isLoadingMore = false;
   String? _currentStatus;
   String? _currentSpecies;
 
-  CharacterListBloc(this.repository) : super(CharacterInitial()) {
+  String get selectedStatus =>
+      _currentStatus ?? AppConstants.DEFAULT_CHARACTER_STATUS;
+
+  String get selectedSpecies =>
+      _currentSpecies ?? AppConstants.DEFAULT_CHARACTER_SPECIES;
+
+
+  CharacterListBloc(this.getCharacterUseCase) : super(CharacterInitial()) {
     on<LoadCharactersWithFilter>(_onLoadCharactersWithFilter);
   }
 
@@ -30,7 +37,7 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
         event.status != _currentStatus || event.species != _currentSpecies;
 
     if (isFilterChanged) {
-      _currentPage = 1;
+      currentPage = 1;
       _totalPages = 1;
       _currentStatus = event.status;
       _currentSpecies = event.species;
@@ -39,45 +46,37 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
     }
 
     try {
-      final int pageToLoad = event.page ?? _currentPage;
+      final int pageToLoad = event.page ?? currentPage;
 
       final (List<Result> newCharacters, int totalPages) =
-          await repository.fetchAllCharacters(
-        pageToLoad,
+          await getCharacterUseCase(
+        page: pageToLoad,
         status: _currentStatus,
         species: _currentSpecies,
       );
       _totalPages = totalPages;
 
       if (state is CharacterLoaded && !isFilterChanged) {
-        final currentState = state as CharacterLoaded;
+        final CharacterLoaded currentState = state as CharacterLoaded;
 
-        final updatedList = List<Result>.from(currentState.characters)
-          ..addAll(newCharacters);
+        final List<Result> updatedList =
+            List<Result>.from(currentState.characters)..addAll(newCharacters);
 
         emit(CharacterLoaded(
           characters: updatedList,
-          hasReachedMax: _currentPage >= _totalPages,
-          selectedStatus:
-              _currentStatus ?? AppConstants.DEFAULT_CHARACTER_STATUS,
-          selectedSpecies:
-              _currentSpecies ?? AppConstants.DEFAULT_CHARACTER_SPECIES,
+          hasReachedMax: currentPage >= _totalPages,
         ));
 
-        _currentPage = pageToLoad + 1;
+        currentPage = pageToLoad + 1;
       } else {
         emit(
           CharacterLoaded(
             characters: newCharacters,
-            hasReachedMax: _currentPage >= _totalPages,
-            selectedStatus:
-                _currentStatus ?? AppConstants.DEFAULT_CHARACTER_STATUS,
-            selectedSpecies:
-                _currentSpecies ?? AppConstants.DEFAULT_CHARACTER_SPECIES,
+            hasReachedMax: currentPage >= _totalPages,
           ),
         );
 
-        _currentPage++;
+        currentPage++;
       }
     } catch (e) {
       emit(CharacterError());

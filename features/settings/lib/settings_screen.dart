@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
-import 'package:core/src/bloc/settings/settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:navigation/navigation.dart';
+import 'bloc/settings_cubit.dart';
 
 @RoutePage()
 class SettingsScreen extends StatelessWidget {
@@ -12,16 +12,20 @@ class SettingsScreen extends StatelessWidget {
     final bool isDarkMode =
         context.watch<SettingsCubit>().state == ThemeMode.dark;
 
-    return Column(
-      children: <Widget>[
-        const Text('Light/Dark Theme'),
-        Switch(
-          value: isDarkMode,
-          onChanged: (_) {
-            context.read<SettingsCubit>().toggleTheme();
-          },
-        ),
-      ],
+    return SafeArea(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Text(AppConstants.SETTINGS_SCREEN_TITLE),
+          const SizedBox(height: 10),
+          Switch(
+            value: isDarkMode,
+            onChanged: (_) {
+              context.read<SettingsCubit>().toggleTheme();
+            },
+          ),
+        ],
+      ),
     );
   }
 }

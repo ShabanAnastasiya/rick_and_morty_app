@@ -13,14 +13,10 @@ class CharacterLoading extends CharacterListState {
 class CharacterLoaded extends CharacterListState {
   final List<Result> characters;
   final bool hasReachedMax;
-  final String selectedStatus;
-  final String selectedSpecies;
 
   CharacterLoaded({
     required this.characters,
     this.hasReachedMax = false,
-    this.selectedStatus = AppConstants.DEFAULT_CHARACTER_STATUS,
-    this.selectedSpecies = AppConstants.DEFAULT_CHARACTER_SPECIES,
   });
 
   CharacterLoaded copyWith({
@@ -32,8 +28,6 @@ class CharacterLoaded extends CharacterListState {
     return CharacterLoaded(
       characters: characters ?? this.characters,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      selectedStatus: selectedStatus ?? this.selectedStatus,
-      selectedSpecies: selectedSpecies ?? this.selectedSpecies,
     );
   }
 }
