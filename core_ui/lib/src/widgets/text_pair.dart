@@ -15,7 +15,7 @@ class TextPair extends StatelessWidget {
           topText,
           style: TextStyle(
             height: 1.5,
-            color: Colors.grey.withOpacity(0.8),
+            color: Colors.grey.withAlpha((0.8 * 255).toInt()),
           ),
         ),
         Text(bottomText),

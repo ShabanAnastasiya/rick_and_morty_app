@@ -7,7 +7,9 @@ import 'package:data/src/entities/character.dart';
 import 'package:flutter/material.dart';
 import 'package:navigation/navigation.dart';
 import 'bloc/character_list_bloc.dart';
-import 'custom_dropdown_button.dart';
+import 'character_scroll_listener.dart';
+import 'species_dropdown.dart';
+import 'status_dropdown.dart';
 
 @RoutePage()
 class CharacterListScreen extends StatefulWidget {
@@ -23,24 +25,10 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
   @override
   void initState() {
     super.initState();
-    //todo
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        final CharacterListState state =
-            context.read<CharacterListBloc>().state;
-
-        if (state is CharacterLoaded && !state.hasReachedMax) {
-          final bloc = context.read<CharacterListBloc>();
-          context.read<CharacterListBloc>().add(
-                LoadCharactersWithFilter(
-                    page: bloc.currentPage,
-                    status: bloc.selectedStatus,
-                    species: bloc.selectedSpecies),
-              );
-        }
-      }
-    });
+    setupCharacterScrollListener(
+      controller: _scrollController,
+      context: context,
+    );
   }
 
   @override
@@ -49,58 +37,11 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
       appBar: AppBar(),
       body: Column(
         children: <Widget>[
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              BlocBuilder<CharacterListBloc, CharacterListState>(
-                builder: (BuildContext context, CharacterListState state) {
-                  final bloc = context.read<CharacterListBloc>();
-
-                  return CustomDropdownButton(
-                    value: bloc.selectedStatus,
-                    items: const <String>[
-                      AppConstants.DEFAULT_CHARACTER_STATUS,
-                      AppConstants.CHARACTER_STATUS_DEAD,
-                      AppConstants.CHARACTER_STATUS_UNKNOWN,
-                    ],
-                    selectedValue: bloc.selectedStatus,
-                    onChanged: (String? value) {
-                      context.read<CharacterListBloc>().add(
-                            LoadCharactersWithFilter(
-                              page: 1,
-                              status: value,
-                              species: bloc.selectedSpecies,
-                            ),
-                          );
-                    },
-                    getLabel: (String status) => status,
-                  );
-                },
-              ),
-              BlocBuilder<CharacterListBloc, CharacterListState>(
-                builder: (BuildContext context, CharacterListState state) {
-                  final bloc = context.read<CharacterListBloc>();
-
-                  return CustomDropdownButton(
-                    value: bloc.selectedSpecies,
-                    items: const <String>[
-                      AppConstants.DEFAULT_CHARACTER_SPECIES,
-                      AppConstants.CHARACTER_SPECIES_ALIEN,
-                    ],
-                    selectedValue: bloc.selectedSpecies,
-                    onChanged: (String? value) {
-                      context.read<CharacterListBloc>().add(
-                            LoadCharactersWithFilter(
-                              page: 1,
-                              status: bloc.selectedStatus,
-                              species: value,
-                            ),
-                          );
-                    },
-                    getLabel: (String species) => species,
-                  );
-                },
-              ),
+              StatusDropdown(),
+              SpeciesDropdown(),
             ],
           ),
           const SizedBox(height: 10),

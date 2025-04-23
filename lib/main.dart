@@ -5,15 +5,12 @@ import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:navigation/navigation.dart';
 import 'package:settings/bloc/settings_cubit.dart';
-import 'di.dart';
 import 'error_handler/provider/app_error_handler_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  ///todo
-  setupDependencies();
   _setupDI(Flavor.dev);
 
   runApp(const App());
@@ -51,7 +48,7 @@ class App extends StatelessWidget {
                 BlocProvider(
                   create:
                       (_) =>
-                          getIt<CharacterListBloc>()
+                          appLocator<CharacterListBloc>()
                             ..add(LoadCharactersWithFilter(page: 1)),
                 ),
               ],

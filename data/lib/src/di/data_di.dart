@@ -1,6 +1,8 @@
 import 'package:core/core.dart';
 
 import '../../data.dart';
+import '../providers/character_provider.dart';
+import '../repositories/character_repository.dart';
 
 abstract class DataDI {
   static void initDependencies(GetIt locator) {
@@ -26,6 +28,14 @@ abstract class DataDI {
       () => ApiProvider(
         locator<DioConfig>().dio,
       ),
+    );
+
+    locator.registerLazySingleton<CharacterProvider>(
+      CharacterProvider.new,
+    );
+
+    locator.registerLazySingleton<CharacterRepository>(
+      () => CharacterRepository(locator()),
     );
   }
 

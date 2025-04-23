@@ -1,3 +1,5 @@
+import 'package:character_list/bloc/character_list_bloc.dart';
+
 import '../../core.dart';
 
 final GetIt appLocator = GetIt.instance;
@@ -21,6 +23,10 @@ abstract class AppDI {
 
     locator.registerLazySingleton<AppEventObserver>(
       appLocator<AppEventBus>,
+    );
+
+    locator.registerFactory<CharacterListBloc>(
+      () => CharacterListBloc(appLocator()),
     );
   }
 }
