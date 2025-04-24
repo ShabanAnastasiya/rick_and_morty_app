@@ -24,7 +24,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_bloc: ^8.1.4
   get_it: ^8.0.3
-  
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  connectivity_plus: ^6.1.4
+  path_provider: ^2.1.5
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -33,6 +38,7 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   auto_route_generator: ^7.3.2
   build_runner: ^2.4.8
+  hive_generator: ^2.0.1
 
 flutter:
   uses-material-design: true

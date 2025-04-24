@@ -1,6 +1,8 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
-import 'package:data/src/entities/character.dart';
-import 'package:domain/src/use_cases/character_list_use_case.dart';
+import 'package:data/data.dart';
+import 'package:domain/domain.dart';
+import 'package:hive/hive.dart';
 
 part 'character_list_event.dart';
 
@@ -8,6 +10,7 @@ part 'character_list_state.dart';
 
 class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   final GetCharacterUseCase getCharacterUseCase;
+  final Box _characterBox;
 
   int currentPage = 1;
   int _totalPages = 1;
@@ -21,8 +24,10 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   String get selectedSpecies =>
       _currentSpecies ?? AppConstants.DEFAULT_CHARACTER_SPECIES;
 
-
-  CharacterListBloc(this.getCharacterUseCase) : super(CharacterInitial()) {
+  CharacterListBloc(
+    this.getCharacterUseCase,
+    this._characterBox,
+  ) : super(CharacterInitial()) {
     on<LoadCharactersWithFilter>(_onLoadCharactersWithFilter);
   }
 
@@ -42,23 +47,58 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
       _currentStatus = event.status;
       _currentSpecies = event.species;
 
+      emit(CharacterLoaded(characters: []));
+
       emit(CharacterLoading());
     }
 
     try {
       final int pageToLoad = event.page ?? currentPage;
 
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final bool isOffline =
+          connectivityResult.contains(ConnectivityResult.none);
+
+      ///TODO
+      print('Connectivity result: $connectivityResult');
+      final filterKey = '${_currentStatus ?? ""}-${_currentSpecies ?? ""}';
+      print('Available keys in Hive: ${_characterBox.keys}');
+      if (isOffline) {
+        final cachedCharacters = _characterBox
+            .get(filterKey, defaultValue: <Result>[]) as List<Result>;
+        print('Retrieved from Hive: ${cachedCharacters.length} characters');
+
+        if (cachedCharacters.isEmpty) {
+          print('Loaded from cache: 0 items');
+          emit(CharacterError(message: AppConstants.CHARACTER_ERROR_MESSAGE));
+        } else {
+          print('Loaded from cache: ${cachedCharacters.length} items');
+          emit(CharacterLoaded(
+            characters: cachedCharacters,
+            hasReachedMax: true,
+          ));
+        }
+
+        _isLoadingMore = false;
+        return;
+      }
       final (List<Result> newCharacters, int totalPages) =
           await getCharacterUseCase(
         page: pageToLoad,
         status: _currentStatus,
         species: _currentSpecies,
       );
+
       _totalPages = totalPages;
 
-      if (state is CharacterLoaded && !isFilterChanged) {
-        final CharacterLoaded currentState = state as CharacterLoaded;
+      if (pageToLoad == 1) {
+        await _characterBox.put(filterKey, newCharacters.take(20).toList());
+        print(
+            'Saved ${newCharacters.length} characters to cache with key: $filterKey');
+      }
 
+      if (state is CharacterLoaded && !isFilterChanged) {
+        final currentState = state as CharacterLoaded;
         final List<Result> updatedList =
             List<Result>.from(currentState.characters)..addAll(newCharacters);
 
@@ -66,20 +106,17 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
           characters: updatedList,
           hasReachedMax: currentPage >= _totalPages,
         ));
-
-        currentPage = pageToLoad + 1;
       } else {
-        emit(
-          CharacterLoaded(
-            characters: newCharacters,
-            hasReachedMax: currentPage >= _totalPages,
-          ),
-        );
-
-        currentPage++;
+        emit(CharacterLoaded(
+          characters: newCharacters,
+          hasReachedMax: currentPage >= _totalPages,
+        ));
       }
-    } catch (e) {
-      emit(CharacterError());
+
+      currentPage = pageToLoad + 1;
+    } catch (e, s) {
+      print('❌ Error while loading characters: $e\n$s');
+      emit(CharacterError(message: AppConstants.ERROR_MESSAGE));
     } finally {
       _isLoadingMore = false;
     }

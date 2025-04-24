@@ -1,5 +1,4 @@
-import 'package:data/src/entities/character.dart';
-import 'package:data/src/repositories/character_repository.dart';
+import 'package:data/data.dart';
 
 class GetCharacterUseCase {
   final CharacterRepository repository;

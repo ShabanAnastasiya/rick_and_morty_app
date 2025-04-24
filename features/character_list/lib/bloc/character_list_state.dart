@@ -22,8 +22,6 @@ class CharacterLoaded extends CharacterListState {
   CharacterLoaded copyWith({
     List<Result>? characters,
     bool? hasReachedMax,
-    String? selectedStatus,
-    String? selectedSpecies,
   }) {
     return CharacterLoaded(
       characters: characters ?? this.characters,
@@ -32,4 +30,8 @@ class CharacterLoaded extends CharacterListState {
   }
 }
 
-class CharacterError extends CharacterListState {}
+class CharacterError extends CharacterListState {
+  final String message;
+
+  CharacterError({required this.message});
+}

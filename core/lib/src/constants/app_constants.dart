@@ -21,4 +21,10 @@ abstract class AppConstants {
   static const String GENDER_LABEL = 'Gender';
   static const String LOCATION_LABEL = 'Location';
   static const String ORIGIN_LABEL = 'Origin';
+
+  static const String CHECK_CONNECTION = 'Check connection';
+  static const String TRY_AGAIN = 'Try again';
+  static const String CHARACTER_ERROR_MESSAGE = 'No internet and no cached data available';
+  static const String SELECT_PAGE = 'Select a page';
+  static const String ERROR_MESSAGE = 'Smth went wrong';
 }
