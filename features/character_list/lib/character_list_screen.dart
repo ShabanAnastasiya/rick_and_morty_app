@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:navigation/navigation.dart';
+import 'bloc/character_list_bloc.dart';
 import 'character_list_screen_body.dart';
 import 'character_scroll_listener.dart';
 
@@ -28,7 +30,13 @@ class _CharacterListScreenState extends State<CharacterListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: CharacterListScreenBody(scrollController: _scrollController),
+      body: BlocProvider(
+        create: (_) => appLocator<CharacterListBloc>()
+          ..add(LoadCharactersWithFilter(page: 1)),
+        child: CharacterListScreenBody(
+          scrollController: _scrollController,
+        ),
+      ),
     );
   }
 

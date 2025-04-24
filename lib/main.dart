@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:character_list/bloc/character_list_bloc.dart';
 import 'package:core/core.dart';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
@@ -58,12 +57,6 @@ class App extends StatelessWidget {
             child: MultiBlocProvider(
               providers: [
                 BlocProvider(create: (_) => SettingsCubit()..loadTheme()),
-                BlocProvider(
-                  create:
-                      (_) =>
-                          appLocator<CharacterListBloc>()
-                            ..add(LoadCharactersWithFilter(page: 1)),
-                ),
               ],
               child: BlocBuilder<SettingsCubit, ThemeMode>(
                 builder: (BuildContext context, ThemeMode themeMode) {
