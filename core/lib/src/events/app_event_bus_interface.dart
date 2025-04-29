@@ -4,6 +4,8 @@ abstract class AppEvent {
   const AppEvent();
 }
 
+class FavoritesUpdated extends AppEvent {}
+
 abstract class AppEventNotifier {
   void notify(AppEvent event);
 }

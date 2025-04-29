@@ -21,6 +21,8 @@ dependencies:
       path: ../features/character_list
   character_details:
     path: ../features/character_details
+  character_favorites:
+    path: ../features/character_favorites
 
   auto_route: ^7.8.4
 

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
 import 'package:data/data.dart';
+import 'package:data/src/favorites_extension.dart';
 import 'package:domain/domain.dart';
 import 'package:hive/hive.dart';
 
@@ -11,6 +14,8 @@ part 'character_list_state.dart';
 class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   final GetCharacterUseCase getCharacterUseCase;
   final Box _characterBox;
+  final Box<Result> favoriteBox;
+  StreamSubscription? _appEventSubscription;
 
   int currentPage = 1;
   int _totalPages = 1;
@@ -27,8 +32,39 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   CharacterListBloc(
     this.getCharacterUseCase,
     this._characterBox,
+    this.favoriteBox,
   ) : super(CharacterInitial()) {
     on<LoadCharactersWithFilter>(_onLoadCharactersWithFilter);
+    on<ToggleFavoriteCharacter>(_onToggleFavoriteCharacter);
+    on<RefreshFavorites>(_onRefreshFavorites);
+    _appEventSubscription =
+        appLocator<AppEventBus>().observe<FavoritesUpdated>((_) {
+      add(RefreshFavorites());
+    });
+  }
+
+  Future<void> _onToggleFavoriteCharacter(
+    ToggleFavoriteCharacter event,
+    Emitter<CharacterListState> emit,
+  ) async {
+    await favoriteBox.toggleFavorite(event.character);
+
+    if (state is CharacterLoaded) {
+      emit(
+        CharacterLoaded(
+          characters: (state as CharacterLoaded).characters,
+        ),
+      );
+    }
+  }
+
+  Future<void> _onRefreshFavorites(RefreshFavorites event, Emitter<CharacterListState> emit) async {
+    if (state is CharacterLoaded) {
+      emit(CharacterLoaded(
+        characters: (state as CharacterLoaded).characters,
+        hasReachedMax: (state as CharacterLoaded).hasReachedMax,
+      ));
+    }
   }
 
   Future<void> _onLoadCharactersWithFilter(
@@ -120,5 +156,11 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
     } finally {
       _isLoadingMore = false;
     }
+  }
+
+  @override
+  Future<void> close() {
+    _appEventSubscription?.cancel();
+    return super.close();
   }
 }

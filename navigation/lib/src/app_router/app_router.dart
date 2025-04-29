@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:character_details/detail_navigation.dart';
 import 'package:character_details/detail_navigation.gm.dart';
+import 'package:character_favorites/favorites_navigation.dart';
+import 'package:character_favorites/favorites_navigation.gm.dart';
 import 'package:character_list/list_navigation.dart';
 import 'package:character_list/list_navigation.gm.dart';
 import 'package:home/home_navigation.dart';
@@ -17,6 +19,7 @@ part 'app_router.gr.dart';
     ListModule,
     DetailModule,
     SettingsModule,
+    FavoritesModule,
   ],
 )
 
@@ -32,5 +35,6 @@ class AppRouter extends _$AppRouter {
       ],
     ),
     AutoRoute(page: CharacterDetailRoute.page),
+    AutoRoute(page: FavoritesRoute.page),
   ];
 }

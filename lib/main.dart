@@ -22,17 +22,21 @@ Future<void> main() async {
   final box = await Hive.openBox<List<Result>>('characters');
   print('Box opened, contains: ${box.length} items');
 
-  ///TODO add detail
-  await _setupDI(Flavor.dev, box);
+  final favoritesBox = await Hive.openBox<Result>('favoritesBox');
+  await _setupDI(Flavor.dev, box, favoritesBox);
 
   runApp(const App());
 }
 
-Future<void> _setupDI(Flavor flavor, Box<List<Result>> box) async {
+Future<void> _setupDI(
+  Flavor flavor,
+  Box<List<Result>> box,
+  Box<Result> favoritesBox,
+) async {
   appLocator.pushNewScope(
     scopeName: unauthScope,
     init: (_) async {
-      await AppDI.initDependencies(appLocator, flavor, box);
+      await AppDI.initDependencies(appLocator, flavor, box, favoritesBox);
       DataDI.initDependencies(appLocator);
       DomainDI.initDependencies(appLocator);
       NavigationDI.initDependencies(appLocator);

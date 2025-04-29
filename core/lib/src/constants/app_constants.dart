@@ -27,4 +27,7 @@ abstract class AppConstants {
   static const String CHARACTER_ERROR_MESSAGE = 'No internet and no cached data available';
   static const String SELECT_PAGE = 'Select a page';
   static const String ERROR_MESSAGE = 'Smth went wrong';
+
+  static const String EMPTY_FAVORITES_LIST = 'Empty favs';
+  static const String FAVORITES = 'favorites';
 }

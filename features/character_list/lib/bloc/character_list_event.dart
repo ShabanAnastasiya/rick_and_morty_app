@@ -13,3 +13,11 @@ class LoadCharactersWithFilter extends CharacterListEvent {
     this.species,
   });
 }
+
+class ToggleFavoriteCharacter extends CharacterListEvent {
+  final Result character;
+
+  ToggleFavoriteCharacter(this.character);
+}
+
+class RefreshFavorites extends CharacterListEvent {}
