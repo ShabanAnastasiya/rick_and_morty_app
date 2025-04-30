@@ -20,7 +20,7 @@ class CharacterListScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   final bloc = context.read<CharacterListBloc>();
+    final bloc = context.read<CharacterListBloc>();
 
     return Column(
       children: <Widget>[
@@ -33,7 +33,7 @@ class CharacterListScreenBody extends StatelessWidget {
                 onPressed: () {
                   context.router.push(const FavoritesRoute());
                 },
-                child: Text(AppConstants.FAVORITES)),
+                child: const Text(AppConstants.FAVORITES)),
           ],
         ),
         const SizedBox(height: 10),
@@ -54,85 +54,16 @@ class CharacterListScreenBody extends StatelessWidget {
                     final Result character = state.characters[index];
                     final isFav = bloc.favoriteBox.isFavorite(character);
 
-                    return GestureDetector(
-                      onTap: () {
-                        context.router
-                            .push(CharacterDetailRoute(character: character));
-                      },
-                      child: Card(
-                        margin: const EdgeInsets.all(12),
-                        elevation: 4,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Stack(children: <Widget>[
-                            Row(
-                              children: <Widget>[
-                                Flexible(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(
-                                      character.image,
-                                      width: double.infinity,
-                                      height: 200,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Text(
-                                            character.name,
-                                            style:
-                                                const TextStyle(fontSize: 17),
-                                          ),
-                                          ColorCircleRow(
-                                            text:
-                                                '${character.status} -- ${character.species}',
-                                            status: character.status,
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 12),
-                                      TextPair(
-                                        AppConstants.LAST_KNOWN_LOCATION,
-                                        character.location.name,
-                                      ),
-                                      const SizedBox(height: 12),
-                                      TextPair(
-                                        AppConstants.FIRST_SEEN_IN,
-                                        character.origin.name,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Positioned(
-                              right: 10,
-                              top: 10,
-                              child: IconButton(
-                                onPressed: () async {
-                                  bloc.add(ToggleFavoriteCharacter(character));
-                                },
-                                icon: Icon(
-                                  isFav ? Icons.star : Icons.star_border,
-                                  color: Colors.purple,
-                                  size: 25,
-                                ),
-                              ),
-                            ),
-                          ]),
-                        ),
-                      ),
-                    );
+                    return CharacterCard(
+                        character: character,
+                        isFav: isFav,
+                        onFavoriteToggle: () {
+                          bloc.add(ToggleFavoriteCharacter(character));
+                        },
+                        onTap: () {
+                          context.router
+                              .push(CharacterDetailRoute(character: character));
+                        });
                   },
                 );
               } else if (state is CharacterError) {
@@ -154,85 +85,3 @@ class CharacterListScreenBody extends StatelessWidget {
     );
   }
 }
-
-// class CharacterCard extends StatelessWidget {
-//   const CharacterCard({super.key});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       margin: const EdgeInsets.all(12),
-//       elevation: 4,
-//       child: Padding(
-//         padding: const EdgeInsets.all(12),
-//         child: Stack(children: <Widget>[
-//           Row(
-//             children: <Widget>[
-//               Flexible(
-//                 child: ClipRRect(
-//                   borderRadius: BorderRadius.circular(8),
-//                   child: Image.network(
-//                     character.image,
-//                     width: double.infinity,
-//                     height: 200,
-//                     fit: BoxFit.cover,
-//                   ),
-//                 ),
-//               ),
-//               const SizedBox(width: 16),
-//               Expanded(
-//                 child: Column(
-//                   crossAxisAlignment:
-//                   CrossAxisAlignment.start,
-//                   children: <Widget>[
-//                     Column(
-//                       crossAxisAlignment:
-//                       CrossAxisAlignment.start,
-//                       children: <Widget>[
-//                         Text(
-//                           character.name,
-//                           style:
-//                           const TextStyle(fontSize: 17),
-//                         ),
-//                         ColorCircleRow(
-//                           text:
-//                           '${character.status} -- ${character.species}',
-//                           status: character.status,
-//                         ),
-//                       ],
-//                     ),
-//                     const SizedBox(height: 12),
-//                     TextPair(
-//                       AppConstants.LAST_KNOWN_LOCATION,
-//                       character.location.name,
-//                     ),
-//                     const SizedBox(height: 12),
-//                     TextPair(
-//                       AppConstants.FIRST_SEEN_IN,
-//                       character.origin.name,
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ],
-//           ),
-//           Positioned(
-//             right: 10,
-//             top: 10,
-//             child: GestureDetector(
-//               onTap: () async {
-//                 await favBox.toggleFavorite(character);
-//                 (context as Element).markNeedsBuild();
-//               },
-//               child: Icon(
-//                 isFav ? Icons.star : Icons.star_border,
-//                 color: Colors.purple,
-//                 size: 25,
-//               ),
-//             ),
-//           ),
-//         ]),
-//       ),
-//     )
-//   }
-// }
