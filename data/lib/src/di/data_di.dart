@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 
 import '../../data.dart';
 import '../providers/character_provider.dart';
-import '../repositories/character_repository.dart';
 
 abstract class DataDI {
   static void initDependencies(GetIt locator) {

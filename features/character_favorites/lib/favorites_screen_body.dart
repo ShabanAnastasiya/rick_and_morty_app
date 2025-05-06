@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:data/src/entities/character.dart';
 import 'package:flutter/material.dart';
 import 'bloc/favorites_bloc.dart';
 
@@ -12,14 +13,14 @@ class FavoritesScreenBody extends StatelessWidget {
         if (state is FavoritesLoading) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is FavoritesLoaded) {
-          final favs = state.characters;
+          final List<Result> favs = state.characters;
 
           return favs.isEmpty
               ? const Center(child: Text(AppConstants.EMPTY_FAVORITES_LIST))
               : ListView.builder(
             itemCount: favs.length,
-            itemBuilder: (_, index) {
-              final c = favs[index];
+            itemBuilder: (_, int index) {
+              final Result c = favs[index];
 
               return Row(
                 children: <Widget>[

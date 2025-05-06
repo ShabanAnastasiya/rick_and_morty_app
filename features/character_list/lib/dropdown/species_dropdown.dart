@@ -1,15 +1,14 @@
 import 'package:core/core.dart';
+import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
-
-import 'bloc/character_list_bloc.dart';
-import 'custom_dropdown_button.dart';
+import '../bloc/character_list_bloc.dart';
 
 class SpeciesDropdown extends StatelessWidget {
   const SpeciesDropdown({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return  BlocBuilder<CharacterListBloc, CharacterListState>(
+    return BlocBuilder<CharacterListBloc, CharacterListState>(
       builder: (BuildContext context, CharacterListState state) {
         final CharacterListBloc bloc = context.read<CharacterListBloc>();
 
@@ -22,12 +21,12 @@ class SpeciesDropdown extends StatelessWidget {
           selectedValue: bloc.selectedSpecies,
           onChanged: (String? value) {
             context.read<CharacterListBloc>().add(
-              LoadCharactersWithFilter(
-                page: 1,
-                status: bloc.selectedStatus,
-                species: value,
-              ),
-            );
+                  LoadCharactersWithFilter(
+                    page: 1,
+                    status: bloc.selectedStatus,
+                    species: value,
+                  ),
+                );
           },
           getLabel: (String species) => species,
         );

@@ -26,11 +26,12 @@ class CharacterProvider {
       );
 
       final data = response.data;
-      final results = data['results'] as List;
-      final totalPages = data['info']['pages'];
+      final List<dynamic> results = data['results'];
+      final int totalPages = data['info']['pages'];
 
-      return {
-        'characters': results.map((json) => Result.fromJson(json)).toList(),
+      return <String, dynamic>{
+        'characters':
+            results.map((dynamic json) => Result.fromJson(json)).toList(),
         'totalPages': totalPages,
       };
     } on DioException catch (e) {

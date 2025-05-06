@@ -1,14 +1,14 @@
 import 'package:core/core.dart';
+import 'package:core_ui/core_ui.dart';
 import 'package:flutter/material.dart';
-import 'bloc/character_list_bloc.dart';
-import 'custom_dropdown_button.dart';
+import '../bloc/character_list_bloc.dart';
 
 class StatusDropdown extends StatelessWidget {
   const StatusDropdown({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return  BlocBuilder<CharacterListBloc, CharacterListState>(
+    return BlocBuilder<CharacterListBloc, CharacterListState>(
       builder: (BuildContext context, CharacterListState state) {
         final CharacterListBloc bloc = context.read<CharacterListBloc>();
 
@@ -22,12 +22,12 @@ class StatusDropdown extends StatelessWidget {
           selectedValue: bloc.selectedStatus,
           onChanged: (String? value) {
             context.read<CharacterListBloc>().add(
-              LoadCharactersWithFilter(
-                page: 1,
-                status: value,
-                species: bloc.selectedSpecies,
-              ),
-            );
+                  LoadCharactersWithFilter(
+                    page: 1,
+                    status: value,
+                    species: bloc.selectedSpecies,
+                  ),
+                );
           },
           getLabel: (String status) => status,
         );

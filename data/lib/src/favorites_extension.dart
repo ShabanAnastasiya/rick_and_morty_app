@@ -5,7 +5,7 @@ extension FavoritesExtension on Box<Result> {
   bool isFavorite(Result c) => values.any((Result x) => x.id == c.id);
 
   Future<void> toggleFavorite(Result c) async {
-    final key = keys.cast<int?>().firstWhere(
+    final int? key = keys.cast<int?>().firstWhere(
           (int? k) => get(k)!.id == c.id,
           orElse: () => null,
         );

@@ -8,18 +8,7 @@ void setupCharacterScrollListener({
 }) {
   controller.addListener(() {
     if (controller.position.pixels == controller.position.maxScrollExtent) {
-      final CharacterListState state = context.read<CharacterListBloc>().state;
-
-      if (state is CharacterLoaded && !state.hasReachedMax) {
-        final CharacterListBloc bloc = context.read<CharacterListBloc>();
-        bloc.add(
-          LoadCharactersWithFilter(
-            page: bloc.currentPage,
-            status: bloc.selectedStatus,
-            species: bloc.selectedSpecies,
-          ),
-        );
-      }
+      context.read<CharacterListBloc>().add(LoadMoreCharacters());
     }
   });
 }

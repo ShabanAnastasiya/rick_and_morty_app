@@ -20,7 +20,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     Emitter<FavoritesState> emit,
   ) async {
     try {
-      final favorites = favoriteBox.values.toList();
+      final List<Result> favorites = favoriteBox.values.toList();
       emit(FavoritesLoaded(favorites));
     } catch (e) {
       emit(FavoritesError(AppConstants.ERROR_MESSAGE));
@@ -36,7 +36,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
 
       appLocator<AppEventNotifier>().notify(FavoritesUpdated());
 
-      final updatedFavorites = favoriteBox.values.toList();
+      final List<Result> updatedFavorites = favoriteBox.values.toList();
       emit(FavoritesLoaded(updatedFavorites));
     } catch (e) {
       emit(FavoritesError(AppConstants.ERROR_MESSAGE));

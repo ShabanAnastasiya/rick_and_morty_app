@@ -13,12 +13,9 @@ class FavoritesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: BlocProvider(
-        create:
-            (_) =>
-                appLocator<FavoritesBloc>()
-                  ..add(LoadFavorites()),
-        child: FavoritesScreenBody(),
+      body: BlocProvider<FavoritesBloc>(
+        create: (_) => appLocator<FavoritesBloc>()..add(LoadFavorites()),
+        child: const FavoritesScreenBody(),
       ),
     );
   }

@@ -5,7 +5,9 @@ import 'package:core/core.dart';
 import 'package:data/data.dart';
 import 'package:data/src/favorites_extension.dart';
 import 'package:domain/domain.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
+import 'package:logger/logger.dart';
 
 part 'character_list_event.dart';
 
@@ -16,6 +18,8 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   final Box _characterBox;
   final Box<Result> favoriteBox;
   StreamSubscription? _appEventSubscription;
+  final ScrollController scrollController = ScrollController();
+  final Logger logger = Logger();
 
   int currentPage = 1;
   int _totalPages = 1;
@@ -37,10 +41,27 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
     on<LoadCharactersWithFilter>(_onLoadCharactersWithFilter);
     on<ToggleFavoriteCharacter>(_onToggleFavoriteCharacter);
     on<RefreshFavorites>(_onRefreshFavorites);
+    on<LoadMoreCharacters>(_onLoadMoreCharacters);
+
+    scrollController.addListener(_onScroll);
     _appEventSubscription =
         appLocator<AppEventBus>().observe<FavoritesUpdated>((_) {
       add(RefreshFavorites());
     });
+  }
+
+  Future<bool> _hasConnection() async {
+    final List<ConnectivityResult> result = await Connectivity().checkConnectivity();
+    return result != ConnectivityResult.none;
+  }
+
+
+  void _onScroll() {
+    if (scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent &&
+        !_isLoadingMore) {
+      add(LoadMoreCharacters());
+    }
   }
 
   Future<void> _onToggleFavoriteCharacter(
@@ -58,12 +79,48 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
     }
   }
 
-  Future<void> _onRefreshFavorites(RefreshFavorites event, Emitter<CharacterListState> emit) async {
+  Future<void> _onRefreshFavorites(
+    RefreshFavorites event,
+    Emitter<CharacterListState> emit,
+  ) async {
     if (state is CharacterLoaded) {
       emit(CharacterLoaded(
         characters: (state as CharacterLoaded).characters,
         hasReachedMax: (state as CharacterLoaded).hasReachedMax,
       ));
+    }
+  }
+
+  Future<void> _onLoadMoreCharacters(
+      LoadMoreCharacters event, Emitter<CharacterListState> emit) async {
+    if (_isLoadingMore || state is! CharacterLoaded) return;
+
+    final loadedState = state as CharacterLoaded;
+
+    if (loadedState.hasReachedMax) return;
+    _isLoadingMore = true;
+
+    try {
+      final (List<Result> newCharacters, int totalPages) =
+          await getCharacterUseCase(
+        page: currentPage,
+        status: _currentStatus,
+        species: _currentSpecies,
+      );
+      _totalPages = totalPages;
+
+      final List<Result> updatedList = List<Result>.from(loadedState.characters)
+        ..addAll(newCharacters);
+
+      emit(CharacterLoaded(
+          characters: updatedList, hasReachedMax: currentPage >= _totalPages));
+
+      currentPage++;
+    } catch (e, s) {
+      logger.d('❌ Error loading more: $e\n$s');
+      emit(CharacterError(message: AppConstants.ERROR_MESSAGE));
+    } finally {
+      _isLoadingMore = false;
     }
   }
 
@@ -82,33 +139,34 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
       _totalPages = 1;
       _currentStatus = event.status;
       _currentSpecies = event.species;
-
-      emit(CharacterLoaded(characters: []));
-
       emit(CharacterLoading());
     }
 
     try {
       final int pageToLoad = event.page ?? currentPage;
 
-      final connectivityResult = await Connectivity().checkConnectivity();
+      final List<ConnectivityResult> connectivityResult =
+          await Connectivity().checkConnectivity();
       final bool isOffline =
           connectivityResult.contains(ConnectivityResult.none);
 
       ///TODO
-      print('Connectivity result: $connectivityResult');
-      final filterKey = '${_currentStatus ?? ""}-${_currentSpecies ?? ""}';
-      print('Available keys in Hive: ${_characterBox.keys}');
+      logger.d('Connectivity result: $connectivityResult');
+      final String filterKey = '${event.status ?? ""}-${event.species ?? ""}';
+      logger.d('Available keys in Hive: ${_characterBox.keys}');
+
       if (isOffline) {
-        final cachedCharacters = _characterBox
-            .get(filterKey, defaultValue: <Result>[]) as List<Result>;
-        print('Retrieved from Hive: ${cachedCharacters.length} characters');
+        final List<Result> cachedCharacters = _characterBox
+                .get(filterKey, defaultValue: <Result>[]) as List<Result>? ??
+            <Result>[];
+
+        logger.d('Retrieved from Hive: ${cachedCharacters.length} characters');
 
         if (cachedCharacters.isEmpty) {
-          print('Loaded from cache: 0 items');
+          logger.d('Loaded from cache: 0 items');
           emit(CharacterError(message: AppConstants.CHARACTER_ERROR_MESSAGE));
         } else {
-          print('Loaded from cache: ${cachedCharacters.length} items');
+          logger.d('Loaded from cache: ${cachedCharacters.length} items');
           emit(CharacterLoaded(
             characters: cachedCharacters,
             hasReachedMax: true,
@@ -121,15 +179,15 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
       final (List<Result> newCharacters, int totalPages) =
           await getCharacterUseCase(
         page: pageToLoad,
-        status: _currentStatus,
-        species: _currentSpecies,
+        status: event.status,
+        species: event.species,
       );
 
       _totalPages = totalPages;
 
       if (pageToLoad == 1) {
         await _characterBox.put(filterKey, newCharacters.take(20).toList());
-        print(
+        logger.d(
             'Saved ${newCharacters.length} characters to cache with key: $filterKey');
       }
 
@@ -151,7 +209,7 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
 
       currentPage = pageToLoad + 1;
     } catch (e, s) {
-      print('❌ Error while loading characters: $e\n$s');
+      logger.d('❌ Error while loading characters: $e\n$s');
       emit(CharacterError(message: AppConstants.ERROR_MESSAGE));
     } finally {
       _isLoadingMore = false;
@@ -161,6 +219,7 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   @override
   Future<void> close() {
     _appEventSubscription?.cancel();
+    scrollController.dispose();
     return super.close();
   }
 }

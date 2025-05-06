@@ -21,3 +21,5 @@ class ToggleFavoriteCharacter extends CharacterListEvent {
 }
 
 class RefreshFavorites extends CharacterListEvent {}
+
+class LoadMoreCharacters extends CharacterListEvent {}

@@ -37,7 +37,7 @@ abstract class AppDI {
     locator.registerFactory<CharacterListBloc>(
       () => CharacterListBloc(
         appLocator<GetCharacterUseCase>(),
-        box as Box<List<Result>>,
+        box,
         favoritesBox,
       ),
     );

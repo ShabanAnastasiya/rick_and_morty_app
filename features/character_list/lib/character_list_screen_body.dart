@@ -7,20 +7,18 @@ import 'package:data/src/favorites_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:navigation/navigation.dart';
 import 'bloc/character_list_bloc.dart';
-import 'species_dropdown.dart';
-import 'status_dropdown.dart';
+import 'dropdown/species_dropdown.dart';
+import 'dropdown/status_dropdown.dart';
 
 class CharacterListScreenBody extends StatelessWidget {
-  final ScrollController scrollController;
-
   const CharacterListScreenBody({
     super.key,
-    required this.scrollController,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<CharacterListBloc>();
+    final CharacterListBloc bloc = context.read<CharacterListBloc>();
+    final ScrollController controller = bloc.scrollController;
 
     return Column(
       children: <Widget>[
@@ -44,7 +42,7 @@ class CharacterListScreenBody extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               } else if (state is CharacterLoaded) {
                 return ListView.builder(
-                  controller: scrollController,
+                  controller: controller,
                   itemCount:
                       state.characters.length + (state.hasReachedMax ? 0 : 1),
                   itemBuilder: (BuildContext context, int index) {
@@ -52,7 +50,7 @@ class CharacterListScreenBody extends StatelessWidget {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final Result character = state.characters[index];
-                    final isFav = bloc.favoriteBox.isFavorite(character);
+                    final bool isFav = bloc.favoriteBox.isFavorite(character);
 
                     return CharacterCard(
                         character: character,
