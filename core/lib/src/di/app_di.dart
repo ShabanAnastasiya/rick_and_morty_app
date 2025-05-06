@@ -2,7 +2,6 @@ import 'package:character_favorites/bloc/favorites_bloc.dart';
 import 'package:character_list/bloc/character_list_bloc.dart';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
-import 'package:hive/hive.dart';
 
 import '../../core.dart';
 
@@ -13,11 +12,9 @@ const String authScope = 'authScope';
 
 abstract class AppDI {
   static Future<void> initDependencies(
-    GetIt locator,
-    Flavor flavor,
-    Box<List<Result>> box,
-    Box<Result> favoritesBox,
-  ) async {
+      GetIt locator,
+      Flavor flavor,
+      ) async {
     locator.registerSingleton<AppConfig>(
       AppConfig.fromFlavor(flavor),
     );
@@ -35,24 +32,19 @@ abstract class AppDI {
     );
 
     locator.registerFactory<CharacterListBloc>(
-      () => CharacterListBloc(
+          () => CharacterListBloc(
         appLocator<GetCharacterUseCase>(),
-        box,
-        favoritesBox,
+        appLocator<DatabaseManager>().charactersBox,
+        appLocator<DatabaseManager>().favoritesBox,
       ),
     );
 
     locator.registerFactory<FavoritesBloc>(
           () => FavoritesBloc(
-        favoritesBox,
+        appLocator<DatabaseManager>().favoritesBox,
       ),
     );
 
-    locator.registerSingleton<Box>(box, instanceName: 'charactersBox');
-
-    locator.registerSingleton<Box<Result>>(
-      favoritesBox,
-      instanceName: 'favoritesBox',
-    );
   }
 }
+

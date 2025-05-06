@@ -15,9 +15,9 @@ part 'character_list_state.dart';
 
 class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   final GetCharacterUseCase getCharacterUseCase;
-  final Box _characterBox;
+  final Box<List<Result>> _characterBox;
   final Box<Result> favoriteBox;
-  StreamSubscription? _appEventSubscription;
+  StreamSubscription<FavoritesUpdated>? _appEventSubscription;
   final ScrollController scrollController = ScrollController();
   final Logger logger = Logger();
 
@@ -95,7 +95,7 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
       LoadMoreCharacters event, Emitter<CharacterListState> emit) async {
     if (_isLoadingMore || state is! CharacterLoaded) return;
 
-    final loadedState = state as CharacterLoaded;
+    final CharacterLoaded loadedState = state as CharacterLoaded;
 
     if (loadedState.hasReachedMax) return;
     _isLoadingMore = true;
@@ -150,15 +150,14 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
       final bool isOffline =
           connectivityResult.contains(ConnectivityResult.none);
 
-      ///TODO
       logger.d('Connectivity result: $connectivityResult');
       final String filterKey = '${event.status ?? ""}-${event.species ?? ""}';
       logger.d('Available keys in Hive: ${_characterBox.keys}');
 
       if (isOffline) {
-        final List<Result> cachedCharacters = _characterBox
-                .get(filterKey, defaultValue: <Result>[]) as List<Result>? ??
-            <Result>[];
+        final List<Result> cachedCharacters =
+            _characterBox.get(filterKey, defaultValue: <Result>[]) ??
+                <Result>[];
 
         logger.d('Retrieved from Hive: ${cachedCharacters.length} characters');
 
@@ -176,11 +175,12 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
         _isLoadingMore = false;
         return;
       }
+
       final (List<Result> newCharacters, int totalPages) =
           await getCharacterUseCase(
         page: pageToLoad,
-        status: event.status,
-        species: event.species,
+        status: _currentStatus,
+        species: _currentSpecies,
       );
 
       _totalPages = totalPages;
@@ -192,9 +192,9 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
       }
 
       if (state is CharacterLoaded && !isFilterChanged) {
-        final currentState = state as CharacterLoaded;
-        final List<Result> updatedList =
-            List<Result>.from(currentState.characters)..addAll(newCharacters);
+        final CharacterLoaded currentState = state as CharacterLoaded;
+        final List<Result> updatedList = List<Result>.from(currentState.characters)
+          ..addAll(newCharacters);
 
         emit(CharacterLoaded(
           characters: updatedList,

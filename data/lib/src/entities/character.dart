@@ -12,7 +12,7 @@ class Character {
     return Character(
       info: Info.fromJson(json['info']),
       results: List<Result>.from(
-        json['results'].map((dynamic x) => Result.fromJson(x)),
+        json['results'].map((x) => Result.fromJson(x)),
       ),
     );
   }
@@ -105,13 +105,13 @@ class Result {
       origin: Location.fromJson(json['origin']),
       location: Location.fromJson(json['location']),
       image: json['image'],
-      episode: List<String>.from(json['episode'].map((dynamic x) => x)),
+      episode: List<String>.from(json['episode'].map((x) => x)),
       url: json['url'],
       created: DateTime.parse(json['created']),
     );
   }
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'status': status,
@@ -121,7 +121,7 @@ class Result {
         'origin': origin.toJson(),
         'location': location.toJson(),
         'image': image,
-        'episode': List<String>.from(episode),
+        'episode': List<dynamic>.from(episode.map((x) => x)),
         'url': url,
         'created': created.toIso8601String(),
       };
@@ -140,5 +140,5 @@ class Location {
   factory Location.fromJson(Map<String, dynamic> json) =>
       Location(name: json['name'], url: json['url']);
 
-  Map<String, dynamic> toJson() => <String, dynamic>{'name': name, 'url': url};
+  Map<String, dynamic> toJson() => {'name': name, 'url': url};
 }

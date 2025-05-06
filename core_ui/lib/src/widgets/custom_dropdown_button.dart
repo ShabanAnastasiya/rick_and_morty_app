@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../core_ui.dart';
 
-class CustomDropdownButton extends StatelessWidget {
-  final String value;
-  final List<String> items;
-  final String? selectedValue;
-  final ValueChanged<String?> onChanged;
-  final String Function(String) getLabel;
+class CustomDropdownButton<T> extends StatelessWidget {
+  final T value;
+  final List<T> items;
+  final T? selectedValue;
+  final ValueChanged<T?> onChanged;
+  final String Function(T) getLabel;
 
   const CustomDropdownButton({
     Key? key,
@@ -25,11 +25,11 @@ class CustomDropdownButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.of(context).blue,
       ),
-      child: DropdownButton<String>(
+      child: DropdownButton<T>(
         value: selectedValue ?? value,
         onChanged: onChanged,
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
+        items: items.map((T item) {
+          return DropdownMenuItem<T>(
             value: item,
             child: Text(
               getLabel(item),

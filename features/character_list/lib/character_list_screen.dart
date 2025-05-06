@@ -3,7 +3,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:navigation/navigation.dart';
 import 'bloc/character_list_bloc.dart';
-import 'character_list_screen_body.dart';
+import 'widget/character_list_screen_body.dart';
 
 @RoutePage()
 class CharacterListScreen extends StatelessWidget {

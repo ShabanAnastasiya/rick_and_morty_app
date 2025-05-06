@@ -1,41 +1,27 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:core/core.dart';
 import 'package:data/data.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:logger/logger.dart';
 import 'package:navigation/navigation.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:settings/bloc/settings_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  final Directory dir = await getApplicationDocumentsDirectory();
-  Hive.init(dir.path);
-
-  Hive.registerAdapter(ResultAdapter());
-  Hive.registerAdapter(LocationAdapter());
-
-  final Box<List<Result>> box = await Hive.openBox<List<Result>>('characters');
-  final Logger logger = Logger();
-  logger.d('Box opened, contains: ${box.length} items');
-
-  final Box<Result> favoritesBox = await Hive.openBox<Result>('favoritesBox');
-  await _setupDI(Flavor.dev, box, favoritesBox);
+  final DatabaseManager dbManager = DatabaseManager();
+  await dbManager.init();
+  appLocator.registerSingleton<DatabaseManager>(dbManager);
+  await _setupDI(Flavor.dev);
 
   runApp(const App());
 }
 
 Future<void> _setupDI(
-  Flavor flavor,
-  Box<List<Result>> box,
-  Box<Result> favoritesBox,
-) async {
-  await AppDI.initDependencies(appLocator, flavor, box, favoritesBox);
+    Flavor flavor,
+    ) async {
+  await AppDI.initDependencies(appLocator, flavor);
   DataDI.initDependencies(appLocator);
   DomainDI.initDependencies(appLocator);
   NavigationDI.initDependencies(appLocator);
