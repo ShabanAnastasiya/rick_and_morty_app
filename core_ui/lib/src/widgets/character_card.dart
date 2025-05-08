@@ -23,10 +23,10 @@ class CharacterCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Card(
-        margin: const EdgeInsets.all(12),
+        margin: const EdgeInsets.all(AppDimens.PADDING_12),
         elevation: 4,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppDimens.PADDING_12),
           child: Stack(children: <Widget>[
             Row(
               children: <Widget>[

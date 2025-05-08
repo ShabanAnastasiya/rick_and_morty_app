@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:data/data.dart';
 
 sealed class DomainEvent extends AppEvent {
   const DomainEvent();

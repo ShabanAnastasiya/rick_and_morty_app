@@ -19,18 +19,6 @@ abstract class AppDI {
       AppConfig.fromFlavor(flavor),
     );
 
-    locator.registerLazySingleton<AppEventBus>(
-      AppEventBus.new,
-    );
-
-    locator.registerLazySingleton<AppEventNotifier>(
-      appLocator<AppEventBus>,
-    );
-
-    locator.registerLazySingleton<AppEventObserver>(
-      appLocator<AppEventBus>,
-    );
-
     locator.registerFactory<CharacterListBloc>(
           () => CharacterListBloc(
         appLocator<GetCharacterUseCase>(),

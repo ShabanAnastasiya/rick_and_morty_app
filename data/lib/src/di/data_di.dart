@@ -17,12 +17,6 @@ abstract class DataDI {
       ),
     );
 
-    locator.registerLazySingleton<ErrorHandler>(
-      () => ErrorHandler(
-        eventNotifier: locator<AppEventNotifier>(),
-      ),
-    );
-
     locator.registerLazySingleton<ApiProvider>(
       () => ApiProvider(
         locator<DioConfig>().dio,
@@ -35,6 +29,18 @@ abstract class DataDI {
 
     locator.registerLazySingleton<CharacterRepository>(
       () => CharacterRepository(locator()),
+    );
+
+    locator.registerLazySingleton<AppEventBus>(
+      AppEventBus.new,
+    );
+
+    locator.registerLazySingleton<AppEventNotifier>(
+      locator<AppEventBus>,
+    );
+
+    locator.registerLazySingleton<AppEventObserver>(
+      locator<AppEventBus>,
     );
   }
 

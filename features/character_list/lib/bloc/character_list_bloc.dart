@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:core/core.dart';
+import 'package:core/src/logger/logger.dart';
 import 'package:data/data.dart';
 import 'package:data/src/favorites_extension.dart';
 import 'package:domain/domain.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
-import 'package:logger/logger.dart';
 
 part 'character_list_event.dart';
 
@@ -19,7 +19,7 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
   final Box<Result> favoriteBox;
   StreamSubscription<FavoritesUpdated>? _appEventSubscription;
   final ScrollController scrollController = ScrollController();
-  final Logger logger = Logger();
+  final AppLogger appLogger = AppLogger();
 
   int currentPage = 1;
   int _totalPages = 1;
@@ -54,7 +54,6 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
     final List<ConnectivityResult> result = await Connectivity().checkConnectivity();
     return result != ConnectivityResult.none;
   }
-
 
   void _onScroll() {
     if (scrollController.position.pixels >=
@@ -117,7 +116,7 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
 
       currentPage++;
     } catch (e, s) {
-      logger.d('❌ Error loading more: $e\n$s');
+      appLogger.debug('❌ Error loading more:', e, s);
       emit(CharacterError(message: AppConstants.ERROR_MESSAGE));
     } finally {
       _isLoadingMore = false;
@@ -150,22 +149,24 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
       final bool isOffline =
           connectivityResult.contains(ConnectivityResult.none);
 
-      logger.d('Connectivity result: $connectivityResult');
+      appLogger.debug('Connectivity result: $connectivityResult');
       final String filterKey = '${event.status ?? ""}-${event.species ?? ""}';
-      logger.d('Available keys in Hive: ${_characterBox.keys}');
+      appLogger.debug('Available keys in Hive: ${_characterBox.keys}');
 
       if (isOffline) {
         final List<Result> cachedCharacters =
             _characterBox.get(filterKey, defaultValue: <Result>[]) ??
                 <Result>[];
 
-        logger.d('Retrieved from Hive: ${cachedCharacters.length} characters');
+        appLogger.debug(
+            'Retrieved from Hive: ${cachedCharacters.length} characters');
 
         if (cachedCharacters.isEmpty) {
-          logger.d('Loaded from cache: 0 items');
+          appLogger.debug('Loaded from cache: 0 items');
           emit(CharacterError(message: AppConstants.CHARACTER_ERROR_MESSAGE));
         } else {
-          logger.d('Loaded from cache: ${cachedCharacters.length} items');
+          appLogger
+              .debug('Loaded from cache: ${cachedCharacters.length} items');
           emit(CharacterLoaded(
             characters: cachedCharacters,
             hasReachedMax: true,
@@ -187,14 +188,14 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
 
       if (pageToLoad == 1) {
         await _characterBox.put(filterKey, newCharacters.take(20).toList());
-        logger.d(
+        appLogger.debug(
             'Saved ${newCharacters.length} characters to cache with key: $filterKey');
       }
 
       if (state is CharacterLoaded && !isFilterChanged) {
         final CharacterLoaded currentState = state as CharacterLoaded;
-        final List<Result> updatedList = List<Result>.from(currentState.characters)
-          ..addAll(newCharacters);
+        final List<Result> updatedList =
+            List<Result>.from(currentState.characters)..addAll(newCharacters);
 
         emit(CharacterLoaded(
           characters: updatedList,
@@ -209,7 +210,7 @@ class CharacterListBloc extends Bloc<CharacterListEvent, CharacterListState> {
 
       currentPage = pageToLoad + 1;
     } catch (e, s) {
-      logger.d('❌ Error while loading characters: $e\n$s');
+      appLogger.debug('❌ Error while loading characters:', e, s);
       emit(CharacterError(message: AppConstants.ERROR_MESSAGE));
     } finally {
       _isLoadingMore = false;

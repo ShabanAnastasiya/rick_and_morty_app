@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:core/src/logger/logger.dart';
 import 'package:hive/hive.dart';
-import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../../data.dart';
@@ -23,8 +23,8 @@ class DatabaseManager {
 
     _charactersBox = await Hive.openBox<List<Result>>('characters');
 
-    final Logger logger = Logger();
-    logger.d('Box opened, contains: ${_charactersBox.length} items');
+    final AppLogger appLogger = AppLogger();
+    appLogger.debug('Box opened, contains: ${_charactersBox.length} items');
 
     _favoritesBox = await Hive.openBox<Result>('favoritesBox');
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core_ui.dart';
+
 class DetailField extends StatelessWidget {
   final String label;
   final String value;
@@ -13,7 +15,7 @@ class DetailField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: AppDimens.PADDING_8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

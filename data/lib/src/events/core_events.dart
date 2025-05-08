@@ -1,4 +1,4 @@
-import '../../core.dart';
+import '../../data.dart';
 
 sealed class CoreEvent extends AppEvent {
   const CoreEvent();
